@@ -3,7 +3,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 
 export const UserColumnDef: ColumnDef<User>[] = [
   {
-    accessorKey: "id",
+    accessorKey: "userId",
     header: "ID",
     size: 60,
   },
@@ -13,23 +13,8 @@ export const UserColumnDef: ColumnDef<User>[] = [
     cell: (info) => info.getValue(),
   },
   {
-    accessorKey: "visits",
-    size: 50,
-    header: () => <span>Visits</span>,
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-  },
-  {
-    accessorKey: "progress",
-    header: "Profile Progress",
-    size: 80,
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Created At",
-    cell: (info) => info.getValue<Date>().toLocaleString(),
-    size: 200,
+    accessorKey: "email",
+    header: "E-mail",
+    cell: (info) => info.getValue(),
   },
 ];
