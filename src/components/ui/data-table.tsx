@@ -1,14 +1,12 @@
 import React from "react";
 import type { User } from "@/utils/types/User";
-import type {
-  OnChangeFn,
-  SortingState,
-  Row,
-  ColumnDef,
-  TableState,
-} from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
+  type OnChangeFn,
+  type SortingState,
+  type Row,
+  type ColumnDef,
+  type TableState,
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
@@ -29,7 +27,7 @@ type DataTableProps = {
   tableSet: TableSet;
   containerRef: React.RefObject<HTMLDivElement>;
 };
-
+//@todo implement sorting, filter, selection
 const DataTable = ({ tableSet, containerRef }: DataTableProps) => {
   const { isFetching, fetchMoreOnBottomReached, columns, state } = tableSet;
   const data = React.useMemo(() => tableSet.data, [tableSet.data]);
