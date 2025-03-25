@@ -27,7 +27,8 @@ type DataTableProps = {
   tableSet: TableSet;
   containerRef: React.RefObject<HTMLDivElement>;
 };
-//@todo implement sorting, filter, selection
+
+// TODO implement sorting, filter, selection
 const DataTable = ({ tableSet, containerRef }: DataTableProps) => {
   const { isFetching, fetchMoreOnBottomReached, columns, state } = tableSet;
   const data = React.useMemo(() => tableSet.data, [tableSet.data]);
@@ -48,9 +49,8 @@ const DataTable = ({ tableSet, containerRef }: DataTableProps) => {
 
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
-    estimateSize: () => 33, //estimate row height for accurate scrollbar dragging
+    estimateSize: () => 33,
     getScrollElement: () => containerRef.current,
-    //measure dynamic row height, except in firefox because it measures table border height incorrectly
     measureElement:
       typeof window !== "undefined" &&
       navigator.userAgent.indexOf("Firefox") === -1
@@ -102,7 +102,7 @@ const DataTable = ({ tableSet, containerRef }: DataTableProps) => {
                 style={{
                   display: "flex",
                   position: "absolute",
-                  transform: `translateY(${virtualRow.start}px)`, //this should always be a `style` as it changes on scroll
+                  transform: `translateY(${virtualRow.start}px)`,
                   width: "100%",
                 }}
               >
