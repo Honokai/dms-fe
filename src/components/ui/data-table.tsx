@@ -23,16 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from "./table";
-
-export type TableSet = {
-  columns: ColumnDef<User>[];
-  data: User[];
-  state: Partial<TableState> | undefined;
-  fetchMoreOnBottomReached: (
-    containerRefElement?: HTMLDivElement | null
-  ) => void;
-  isFetching: boolean;
-};
+import type { TableSet } from "@/utils/types/TableSet";
 
 type DataTableProps = {
   tableSet: TableSet;

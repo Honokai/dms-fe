@@ -2,7 +2,6 @@ import { Badge } from "@/components/ui/badge";
 import { getFieldValue } from "@/utils/functions";
 import type { User } from "@/utils/types/User";
 import type { ColumnDef } from "@tanstack/react-table";
-import { validators } from "tailwind-merge";
 
 export const UserColumnDef: ColumnDef<User>[] = [
   {
