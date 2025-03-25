@@ -17,6 +17,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -65,6 +66,9 @@ const DataTable = ({ tableSet, containerRef }: DataTableProps) => {
       ref={containerRef}
       onScroll={(e) => fetchMoreOnBottomReached(e.currentTarget)}
     >
+      <span className="top-0 sticky z-10">
+        Is fetching {isFetching ? "yes" : "no"}
+      </span>
       <Table className="grid">
         <TableHeader className="grid sticky top-0 z-[1] bg-primary-foreground">
           {table.getHeaderGroups().map((headerGroup) => (

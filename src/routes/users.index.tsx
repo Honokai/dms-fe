@@ -78,7 +78,8 @@ function UserComponent() {
       sorting,
     },
     isFetching,
-    fetchMoreOnBottomReached: (e) => fetchMoreOnBottomReached(e),
+    fetchMoreOnBottomReached: (e: HTMLDivElement) =>
+      fetchMoreOnBottomReached(e),
   };
 
   const totalDBRowCount = data?.pages?.[0]?.pagination?.totalRecords ?? 0;
