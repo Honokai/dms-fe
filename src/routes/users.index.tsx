@@ -105,5 +105,9 @@ function UserComponent() {
     fetchMoreOnBottomReached(containerRef.current);
   }, [fetchMoreOnBottomReached]);
 
-  return <DataTable containerRef={containerRef} tableSet={tableSet} />;
+  return (
+    <div className="mx-auto container">
+      <DataTable containerRef={containerRef} tableSet={tableSet} />
+    </div>
+  );
 }

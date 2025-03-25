@@ -72,19 +72,18 @@ const DataTable = ({ tableSet, containerRef }: DataTableProps) => {
 
   return (
     <div
-      className="rounded-md border pb-2 overflow-auto h-[600px]"
+      className="rounded-md border pb-2 overflow-auto relative h-[600px]"
       ref={containerRef}
       onScroll={(e) => fetchMoreOnBottomReached(e.currentTarget)}
     >
-      <Table>
-        <TableHeader className="sticky top-0 z-[1]">
+      <Table className="grid">
+        <TableHeader className="grid sticky top-0 z-[1] bg-primary-foreground">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow className="flex w-full" key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
                 <TableHead
                   key={header.id}
-                  // className={`flex w-[${header.getSize()}px]`}
-                  className="relative"
+                  className={`flex items-center ${!header.id.toLowerCase().includes("id") && "flex-1"}`}
                 >
                   {header.isPlaceholder
                     ? null
@@ -94,13 +93,16 @@ const DataTable = ({ tableSet, containerRef }: DataTableProps) => {
                       )}
                 </TableHead>
               ))}
-              <TableHead key={"actions"} className={`w-[100px]`}>
+              <TableHead key={"actions"} className={`flex flex-1 items-center`}>
                 Actions
               </TableHead>
             </TableRow>
           ))}
         </TableHeader>
-        <TableBody className={`w-full grid relative`}>
+        <TableBody
+          className={`grid relative`}
+          style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
+        >
           {rowVirtualizer.getVirtualItems().map((virtualRow) => {
             const row = rows[virtualRow.index] as Row<User>;
             return (
@@ -119,9 +121,10 @@ const DataTable = ({ tableSet, containerRef }: DataTableProps) => {
                   return (
                     <TableCell
                       key={cell.id}
+                      id={cell.id}
+                      className={`${!cell.id.toLowerCase().includes("id") && "flex-1"}`}
                       style={{
                         display: "flex",
-                        width: cell.column.getSize(),
                       }}
                     >
                       {flexRender(
@@ -131,6 +134,7 @@ const DataTable = ({ tableSet, containerRef }: DataTableProps) => {
                     </TableCell>
                   );
                 })}
+                <TableCell className="flex flex-1"></TableCell>
               </TableRow>
             );
           })}
