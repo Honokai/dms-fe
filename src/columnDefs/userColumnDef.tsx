@@ -8,14 +8,16 @@ export const UserColumnDef: ColumnDef<User>[] = [
     accessorKey: "userId",
     header: "ID",
     size: 60,
+    enableColumnFilter: false,
   },
   {
+    id: "Name",
     accessorFn: (row: User) => row.name,
-    accessorKey: "name",
     header: "Name",
     cell: (info) => info.getValue(),
   },
   {
+    id: "Email",
     accessorKey: "email",
     header: "E-mail",
     cell: (info) => info.getValue(),
@@ -25,9 +27,11 @@ export const UserColumnDef: ColumnDef<User>[] = [
     cell: (info) => info.getValue(),
     accessorFn: (user) => (
       <span className="flex gap-1 flex-wrap">
-        {(getFieldValue("groups.name", user) as string[]).map((groupName) => (
-          <Badge>{groupName}</Badge>
-        ))}
+        {(getFieldValue("groups.name", user) as string[]).map(
+          (groupName, index) => (
+            <Badge key={`${index}`}>{groupName}</Badge>
+          )
+        )}
       </span>
     ),
   },
