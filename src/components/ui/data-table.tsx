@@ -1,9 +1,10 @@
-import React from "react";
+import React, { type ChangeEvent, type ChangeEventHandler } from "react";
 import type { User } from "@/utils/types/User";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   type OnChangeFn,
   type SortingState,
+  type ColumnFiltersState,
   type Row,
   type ColumnDef,
   type TableState,
@@ -11,6 +12,9 @@ import {
   getCoreRowModel,
   getSortedRowModel,
   useReactTable,
+  type ColumnFilter,
+  type CoreHeader,
+  type Column,
 } from "@tanstack/react-table";
 
 import {
@@ -22,28 +26,39 @@ import {
   TableHeader,
   TableRow,
 } from "./table";
-import type { TableSet } from "@/utils/types/TableSet";
-
-type DataTableProps = {
-  tableSet: TableSet;
-  containerRef: React.RefObject<HTMLDivElement>;
-};
+import type { DataTableProps, TableSet } from "@/utils/types/TableSet";
+import { Input } from "./input";
+import {
+  Select,
+  SelectContent,
+  SelectTrigger,
+  SelectItem,
+  SelectValue,
+} from "./select";
 
 // TODO implement sorting, filter, selection
-const DataTable = ({ tableSet, containerRef }: DataTableProps) => {
-  const { isFetching, fetchMoreOnBottomReached, columns, state } = tableSet;
+const DataTable = <T,>({ tableSet, containerRef }: DataTableProps<T>) => {
+  const {
+    isFetching,
+    fetchMoreOnBottomReached,
+    columns,
+    state,
+    onColumnFiltersChange,
+  } = tableSet;
   const data = React.useMemo(() => tableSet.data, [tableSet.data]);
 
   const table = useReactTable({
     data,
     columns,
     state,
+    onColumnFiltersChange,
     // onSortingChange: (updater: OnChangeFn<SortingState>) => {
     //   table.setSorting(updater);
     // },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     debugTable: true,
+    manualFiltering: true,
   });
 
   const { rows } = table.getRowModel();
@@ -60,15 +75,21 @@ const DataTable = ({ tableSet, containerRef }: DataTableProps) => {
     overscan: 2,
   });
 
+  // TODO: improve filter so it only updates when the user stops typing
+  const handleFilterChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    table
+      .getColumn(e.currentTarget.id)
+      ?.setFilterValue({ value: e.target.value, condition: "contains" });
+  };
+
   return (
     <div
       className="rounded-md border pb-2 overflow-auto relative h-[600px]"
       ref={containerRef}
       onScroll={(e) => fetchMoreOnBottomReached(e.currentTarget)}
     >
-      <span className="top-0 sticky z-10">
-        Is fetching {isFetching ? "yes" : "no"}
-      </span>
       <Table className="grid">
         <TableHeader className="grid sticky top-0 z-[1] bg-primary-foreground">
           {table.getHeaderGroups().map((headerGroup) => (
@@ -76,7 +97,7 @@ const DataTable = ({ tableSet, containerRef }: DataTableProps) => {
               {headerGroup.headers.map((header) => (
                 <TableHead
                   key={header.id}
-                  className={`flex items-center ${!header.id.toLowerCase().includes("id") && "flex-1"}`}
+                  className={`flex items-center h-fit flex-col my-2 ${!header.id.toLowerCase().includes("id") && "flex-1"}`}
                 >
                   {header.isPlaceholder
                     ? null
@@ -84,6 +105,39 @@ const DataTable = ({ tableSet, containerRef }: DataTableProps) => {
                         header.column.columnDef.header,
                         header.getContext()
                       )}
+                  {header.column.getCanFilter() && (
+                    <div>
+                      <Select key={`${header.id}-select`}>
+                        <SelectTrigger className="w-full mt-2">
+                          <SelectValue placeholder="Condition" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="contains">Contains</SelectItem>
+                          <SelectItem value="not_contains">
+                            Not contains
+                          </SelectItem>
+                          <SelectItem value="empty">Empty</SelectItem>
+                          <SelectItem value="not_empty">Not empty</SelectItem>
+                          <SelectItem value="equals">Equals to</SelectItem>
+                          <SelectItem value="not_equals">
+                            Not equal to
+                          </SelectItem>
+                          <SelectItem value="starts">Starts with</SelectItem>
+                          <SelectItem value="ends">Ends with</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        id={`${header.id}`}
+                        key={`${header.id}-input`}
+                        defaultValue={
+                          header.column.getFilterValue()?.value as string
+                        }
+                        onChange={(e) => handleFilterChange(e)}
+                        className="mt-2"
+                        placeholder={`${header.column.columnDef.header}`}
+                      />
+                    </div>
+                  )}
                 </TableHead>
               ))}
               <TableHead key={"actions"} className={`flex flex-1 items-center`}>
@@ -131,8 +185,10 @@ const DataTable = ({ tableSet, containerRef }: DataTableProps) => {
               </TableRow>
             );
           })}
-          {isFetching && <div>Fetching More...</div>}
         </TableBody>
+        <TableFooter className="sticky bottom-0">
+          {isFetching && <div className="text-md">Fetching More...</div>}
+        </TableFooter>
       </Table>
     </div>
   );
