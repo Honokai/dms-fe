@@ -1,17 +1,21 @@
-import type { ColumnDef, TableState } from "@tanstack/react-table";
-import type { User } from "./User";
+import type {
+  ColumnDef,
+  ColumnFiltersState,
+  TableState,
+} from "@tanstack/react-table";
 
-export type TableSet = {
-  columns: ColumnDef<User>[];
-  data: User[];
+export type TableSet<T> = {
+  columns: ColumnDef<T>[];
+  data: T[];
   state: Partial<TableState> | undefined;
-  fetchMoreOnBottomReached: (
-    containerRefElement?: HTMLDivElement | null
-  ) => void;
+  fetchMoreOnBottomReached: (containerRefElement: HTMLDivElement) => void;
   isFetching: boolean;
+  onColumnFiltersChange?: React.Dispatch<
+    React.SetStateAction<ColumnFiltersState>
+  >;
 };
 
-type DataTableProps = {
-  tableSet: TableSet;
+export type DataTableProps<T> = {
+  tableSet: TableSet<T>;
   containerRef: React.RefObject<HTMLDivElement>;
 };
