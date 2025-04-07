@@ -1,13 +1,11 @@
-import React from "react";
-import DataTableV1 from "@/components/ui/data-table-v1";
-import { Badge } from "@/components/ui/badge";
+import React, { use } from "react";
 import { apiClient } from "@/utils/apiClient";
 import type { ApiResponse } from "@/utils/types/ApiResponse";
 import type { User } from "@/utils/types/User";
 import { createFileRoute } from "@tanstack/react-router";
 import { UserColumnDef } from "@/columnDefs/userColumnDef";
 
-import type { SortingState } from "@tanstack/react-table";
+import type { ColumnFiltersState, SortingState } from "@tanstack/react-table";
 
 import {
   keepPreviousData,
@@ -15,7 +13,8 @@ import {
   QueryClientProvider,
   useInfiniteQuery,
 } from "@tanstack/react-query";
-import DataTable, { type TableSet } from "@/components/ui/data-table";
+import DataTable from "@/components/ui/data-table";
+import type { TableSet } from "@/utils/types/TableSet";
 
 export const Route = createFileRoute("/users/")({
   component: Wrapper,
@@ -36,20 +35,31 @@ function Wrapper() {
 function UserComponent() {
   const containerRef = React.useRef<HTMLDivElement>({} as HTMLDivElement);
   const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  );
+
+  const constructQueryFilters = () => {
+    let query = "";
+    console.log("columnFilters", columnFilters);
+    columnFilters.forEach((filter, index) => {
+      query += `&FilterTerms[${index}].name=${filter.id}&FilterTerms[${index}].operator=${filter.value?.condition}&FilterTerms[${index}].value=${filter.value?.value}`;
+    });
+
+    return encodeURI(query);
+  };
 
   const { data, fetchNextPage, isFetching, isLoading } = useInfiniteQuery<
     ApiResponse<User[]>
   >({
-    queryKey: [
-      "users",
-      sorting, //refetch when sorting changes
-    ],
+    queryKey: ["users", sorting, columnFilters],
     queryFn: async ({ pageParam }) => {
       const fetchedData = await apiClient
         .get<ApiResponse<User[]>>(
           typeof pageParam == "string"
-            ? (pageParam as string)
-            : `/users?pageSize=${30}&pageIndex=${pageParam}`
+            ? (pageParam as string) + constructQueryFilters()
+            : `/users?pageSize=${30}&pageIndex=${pageParam}` +
+                constructQueryFilters()
         )
         .then((r) => r.data)
         .catch(() => {
@@ -71,22 +81,23 @@ function UserComponent() {
     [data]
   );
 
-  const tableSet: TableSet = {
+  const tableSet: TableSet<User> = {
     columns: UserColumnDef,
     data: flatData,
     state: {
       sorting,
     },
     isFetching,
-    fetchMoreOnBottomReached: (e: HTMLDivElement) =>
-      fetchMoreOnBottomReached(e),
+    fetchMoreOnBottomReached: (div: HTMLDivElement | null) =>
+      fetchMoreOnBottomReached(div),
+    onColumnFiltersChange: setColumnFilters,
   };
 
   const totalDBRowCount = data?.pages?.[0]?.pagination?.totalRecords ?? 0;
   const totalFetched = flatData.length;
 
   const fetchMoreOnBottomReached = React.useCallback(
-    (containerRefElement?: HTMLDivElement | null) => {
+    (containerRefElement: HTMLDivElement | null) => {
       if (containerRefElement) {
         const { scrollHeight, scrollTop, clientHeight } = containerRefElement;
         //once the user has scrolled within 500px of the bottom of the table, fetch more data if we can
@@ -99,7 +110,7 @@ function UserComponent() {
         }
       }
     },
-    [fetchNextPage, isFetching, totalFetched, totalDBRowCount]
+    [fetchNextPage, isFetching, totalFetched, totalDBRowCount, columnFilters]
   );
 
   React.useEffect(() => {
@@ -108,6 +119,9 @@ function UserComponent() {
 
   return (
     <div className="mx-auto container">
+      {columnFilters.map((filter) => (
+        <div>{filter.id}</div>
+      ))}
       <DataTable containerRef={containerRef} tableSet={tableSet} />
     </div>
   );

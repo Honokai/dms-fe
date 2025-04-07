@@ -37,6 +37,7 @@ import {
 } from "./select";
 
 // TODO implement sorting, filter, selection
+// TODO: break down into smaller components
 const DataTable = <T,>({ tableSet, containerRef }: DataTableProps<T>) => {
   const {
     isFetching,
